@@ -81,7 +81,6 @@ namespace DungeonProgMaster
                     }
                 }
             }
-            gamePlace.Invalidate();
         }
 
         /// <summary>
@@ -98,7 +97,7 @@ namespace DungeonProgMaster
             SetPlayerWorldPositionAndSize(sizer);
             var player = level.player;
             playerAnimator.UpdatePlayerFrame(player.Movement);
-
+            gamePlace.Invalidate();
             if (player.Position != player.TargetPosition)
             {
                 Thread.Sleep((int)(100 * frameTimeSpeed));
@@ -175,13 +174,16 @@ namespace DungeonProgMaster
                     if (isStoped)
                     {
                         SetEnabledControls(true, menu.Controls);
+                        stopButton.BeginInvoke(new Action(() => stopButton.Enabled = false));
                         LevelReset();
                         return;
                     }
+
                     scripts[i].Play(level.player);
                     if (!CheckWallAndBlank())
                     {
                         SetEnabledControls(true, menu.Controls);
+                        stopButton.BeginInvoke(new Action(() => stopButton.Enabled = false));
                         return;
                     }
                     PlayerMovement(ref isStoped);
@@ -190,7 +192,8 @@ namespace DungeonProgMaster
                 Finished();
 
                 SetEnabledControls(true, menu.Controls);
-                
+                stopButton.BeginInvoke(new Action(() => stopButton.Enabled = false));
+
             }, stopTask.Token);
         }
 

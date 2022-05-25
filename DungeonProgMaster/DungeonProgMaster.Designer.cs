@@ -14,6 +14,7 @@ namespace DungeonProgMaster
         public RichTextBox notepad;
         public FlowLayoutPanel menu;
         private Sizer sizer;
+        private NumericUpDown numericSpeed;
         private Button playButton;
         private Button addButton;
         private Button notepadReset;
@@ -267,6 +268,12 @@ namespace DungeonProgMaster
             playButton = CreateStandartMenuButton("PlayButton", "Запустить алгоритм", new EventHandler(PlayButtonClick));
             notepadReset = CreateStandartMenuButton("NotepadResetButton", "Очистить алгоритм", new EventHandler(NotepadResetClick));
             stopButton = CreateStandartMenuButton("Stop", "Остановить алгоритм", new EventHandler(StopButtonClick));
+            stopButton.Enabled = false;
+
+            numericSpeed = new NumericUpDown() { Margin = Padding.Empty, Width = (int)(menu.Height * 1.6f), Location = new Point(menu.Height, 0),
+                Height = menu.Height, Minimum = 1, Maximum = 10, Font = new Font(FontFamily.GenericSansSerif, 48f, FontStyle.Regular)};
+            numericSpeed.ValueChanged += new EventHandler((object sender, EventArgs args) => { frameTimeSpeed = 1f/(float)(sender as NumericUpDown).Value; });
+            menu.Controls.Add(numericSpeed);
         }
 
         private Button CreateStandartMenuButton(string name, string toolTip, EventHandler handler)
@@ -324,7 +331,7 @@ namespace DungeonProgMaster
         {
             foreach (var i in collection)
             {
-                var k = i as Button;
+                var k = (Control)i;
                 k.BeginInvoke(new Action(() => k.Enabled = enabled));
             }
         }
