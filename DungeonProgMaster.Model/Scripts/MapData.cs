@@ -2,7 +2,7 @@
 using System.Drawing;
 using System.IO;
 
-namespace DungeonProgMaster
+namespace DungeonProgMaster.Model
 {
     public static class MapData
     {

@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DungeonProgMaster", "Dungeo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DungeonProgMaster.Model", "..\DungeonProgMaster.Model\DungeonProgMaster.Model.csproj", "{9201B805-ADB1-43F5-B422-77FFF83E9E81}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DungeonProgMaster.Model.Tests", "..\DungeonProgMaster.Model.Tests\DungeonProgMaster.Model.Tests.csproj", "{90C0CE0E-ABB0-476F-9E34-B80566470B65}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DungeonProgMaster.Model.Tests", "..\DungeonProgMaster.Model.Tests\DungeonProgMaster.Model.Tests.csproj", "{2C24D820-FE59-42F6-8425-3E19A71AFA24}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +23,10 @@ Global
 		{9201B805-ADB1-43F5-B422-77FFF83E9E81}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9201B805-ADB1-43F5-B422-77FFF83E9E81}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9201B805-ADB1-43F5-B422-77FFF83E9E81}.Release|Any CPU.Build.0 = Release|Any CPU
-		{90C0CE0E-ABB0-476F-9E34-B80566470B65}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{90C0CE0E-ABB0-476F-9E34-B80566470B65}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{90C0CE0E-ABB0-476F-9E34-B80566470B65}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{90C0CE0E-ABB0-476F-9E34-B80566470B65}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2C24D820-FE59-42F6-8425-3E19A71AFA24}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2C24D820-FE59-42F6-8425-3E19A71AFA24}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2C24D820-FE59-42F6-8425-3E19A71AFA24}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2C24D820-FE59-42F6-8425-3E19A71AFA24}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 
-namespace DungeonProgMaster
+namespace DungeonProgMaster.Model
 {
     public static class Levels
     {
