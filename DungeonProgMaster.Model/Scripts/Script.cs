@@ -33,7 +33,7 @@ namespace DungeonProgMaster.Model
         {
             { Command.Forward, ("Player.Forward();", "Player.Forward();") },
             { Command.Rotate, ("Player.Rotate();", "Player.Rotate();") },
-            { Command.RepeatStart, ("Repeat(4){", "Repeat(4)") },
+            { Command.RepeatStart, ("Repeat(3){", "Repeat(3)") },
             { Command.RepeatEnd, ("}", "EndRepeat()") },
         };
     }

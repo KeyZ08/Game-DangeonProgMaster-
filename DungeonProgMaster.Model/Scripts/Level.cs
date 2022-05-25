@@ -154,7 +154,7 @@ namespace DungeonProgMaster.Model
                 buffer.Last.Value.RemoveAt(0);
                 buffer.Last.Value.RemoveAt(buffer.Last.Value.Count - 1);
                 var comboScript = new List<Script>();
-                for (var j = 0; j < 4; j++)
+                for (var j = 0; j < 3; j++)
                     comboScript.AddRange(buffer.Last.Value);
                 result.AddRange(comboScript);
             }

@@ -16,14 +16,10 @@ namespace DungeonProgMaster.Model
         }
 
         public static void RepeatStart(Player player)
-        {
-            
-        }
+        { }
 
         public static void RepeatEnd(Player player)
-        {
-
-        }
+        { }
 
         public static Dictionary<Command, Action<Player>> commands = new()
         {

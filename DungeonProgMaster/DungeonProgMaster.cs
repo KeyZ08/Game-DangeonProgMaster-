@@ -22,7 +22,7 @@ namespace DungeonProgMaster
 
         public DungeonProgMaster()
         {
-            level = Levels.GetLevel(0);
+            level = Levels.GetLevel(3);
             playerAnimator = new PlayerAnimator(level.player.Movement);
             InitializeComponent();
             InitializeDesign();
@@ -61,7 +61,8 @@ namespace DungeonProgMaster
                 return;
 
             var frame = 1.0f / playerAnimator.Anim.Count;
-            player.Move(frame);
+            player.Move(frame); 
+            playerAnimator.UpdatePlayerFrame(player.Movement);
 
             if ((playerAnimator.CurrentFrame == 2 || playerAnimator.CurrentFrame == 4) && sounds.TryGetValue("Floor", out (WaveOut wave, string audio) floor))
             {
@@ -96,7 +97,7 @@ namespace DungeonProgMaster
 
             SetPlayerWorldPositionAndSize(sizer);
             var player = level.player;
-            playerAnimator.UpdatePlayerFrame(player.Movement);
+            
             gamePlace.Invalidate();
             if (player.Position != player.TargetPosition)
             {
