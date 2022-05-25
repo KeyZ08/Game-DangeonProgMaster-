@@ -17,6 +17,7 @@ namespace DungeonProgMaster
         private Button playButton;
         private Button addButton;
         private Button notepadReset;
+        private Button stopButton;
         private ContextMenuStrip contextMenu;
         private Dictionary<string, (WaveOut wave, string audio)> sounds = 
             new Dictionary<string, (WaveOut wave, string audio)>()
@@ -97,11 +98,11 @@ namespace DungeonProgMaster
             for (int i = 0; i < sizer.columns; i++)
                 for (int j = 0; j < sizer.rows; j++)
                 {
-                    if (level.map[j, i] != (int)MapData.Tales.Blank)
+                    if (level.map[j, i] != (int)Tales.Blank)
                         PaintMapImage(gr, 1, i, j);
                     else PaintMapImage(gr, 0, i, j);
 
-                    if (level.map[j, i] == (int)MapData.Tales.Finish)
+                    if (level.map[j, i] == (int)Tales.Finish)
                         PaintMapImage(gr, 2, i, j);
                 }
 
@@ -117,8 +118,8 @@ namespace DungeonProgMaster
 
             //игрок
             var player = level.player;
-            gr.DrawImage(player.Anim[player.CurrentFrame], new RectangleF(WorldPlayerPosition, WorldPlayerSize),
-                 new RectangleF(PointF.Empty, player.Anim[player.CurrentFrame].Size), GraphicsUnit.Pixel);
+            gr.DrawImage(playerAnimator.Anim[playerAnimator.CurrentFrame], new RectangleF(WorldPlayerPosition, WorldPlayerSize),
+                 new RectangleF(PointF.Empty, playerAnimator.Anim[playerAnimator.CurrentFrame].Size), GraphicsUnit.Pixel);
             
         }
 
@@ -170,6 +171,8 @@ namespace DungeonProgMaster
             gamePlace.Margin = Padding.Empty;
             gamePlace.Paint += new PaintEventHandler(Painter);
         }
+
+        #region Notepad
 
         private void NotepadCreate()
         {
@@ -253,6 +256,7 @@ namespace DungeonProgMaster
             if (str.Length == 0) return "    0.";
             return str.ToString();
         }
+        #endregion
 
         private void MenuCreate()
         {
@@ -262,6 +266,7 @@ namespace DungeonProgMaster
             addButton = CreateStandartMenuButton("AddButton", "Добавить элемент", new EventHandler(AddButtonClick));
             playButton = CreateStandartMenuButton("PlayButton", "Запустить алгоритм", new EventHandler(PlayButtonClick));
             notepadReset = CreateStandartMenuButton("NotepadResetButton", "Очистить алгоритм", new EventHandler(NotepadResetClick));
+            stopButton = CreateStandartMenuButton("Stop", "Остановить алгоритм", new EventHandler(StopButtonClick));
         }
 
         private Button CreateStandartMenuButton(string name, string toolTip, EventHandler handler)
@@ -269,7 +274,7 @@ namespace DungeonProgMaster
             var button = new Button();
             button.Margin = Padding.Empty;
             var toolTip1 = new ToolTip();
-            toolTip1.SetToolTip(button, "Добавить элемент");
+            toolTip1.SetToolTip(button, toolTip);
             button.Location = new Point(menu.Height, 0);
             button.Size = new Size(menu.Height, menu.Height);
             button.BackgroundImage = new Bitmap(Image.FromFile(Application.StartupPath + @"..\..\..\Resources\" + name + ".png"),
@@ -291,7 +296,8 @@ namespace DungeonProgMaster
 
         private void PieceUpdateFrame(object sender, EventArgs args)
         {
-            pieceData.CurrentFrame++;
+            if (level.AllPiecesAssembled()) return;
+            pieceData.FrameUpdate();
             gamePlace.Invalidate();
         }
 

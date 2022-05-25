@@ -5,27 +5,30 @@ using Timers = System.Timers;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using NAudio.Wave;
+using System.Threading;
 
 namespace DungeonProgMaster
 {
     public partial class DungeonProgMaster : Form
     {
         Level level;
-
+        readonly PlayerAnimator playerAnimator;
         private PointF WorldPlayerPosition;
         private SizeF WorldPlayerSize;
         private readonly Timers.Timer pieceAnimator;
         private float frameTimeSpeed = 1f;//чем больше тем медленнее
-        private readonly MapData.Piece pieceData;
+        private readonly Piece pieceData;
+        private CancellationTokenSource stopTask;
 
         public DungeonProgMaster()
         {
             level = Levels.GetLevel(0);
+            playerAnimator = new PlayerAnimator(level.player.Movement);
             InitializeComponent();
             InitializeDesign();
 
-            pieceData = new MapData.Piece();
-            pieceAnimator = new Timers.Timer(100 * frameTimeSpeed);
+            pieceData = new Piece();
+            pieceAnimator = new Timers.Timer(100);
             pieceAnimator.Elapsed += PieceUpdateFrame;
             pieceAnimator.Start();
         }
@@ -36,8 +39,9 @@ namespace DungeonProgMaster
         private void LevelReset()
         {
             level.Reset();
-            SetPlayerWorldPositionAndSize(sizer);
             WindowResize();
+            playerAnimator.Reset(level.player.Movement);
+            
             gamePlace.Invalidate();
         }
 
@@ -56,10 +60,10 @@ namespace DungeonProgMaster
             if (player.Position == player.TargetPosition)
                 return;
 
-            var frame = 1.0f / player.Anim.Count;
+            var frame = 1.0f / playerAnimator.Anim.Count;
             player.Move(frame);
 
-            if ((player.CurrentFrame == 2 || player.CurrentFrame == 4) && sounds.TryGetValue("Floor", out (WaveOut wave, string audio) floor))
+            if ((playerAnimator.CurrentFrame == 2 || playerAnimator.CurrentFrame == 4) && sounds.TryGetValue("Floor", out (WaveOut wave, string audio) floor))
             {
                 floor.wave.Init(new AudioFileReader(floor.audio));
                 floor.wave.Play();
@@ -77,6 +81,7 @@ namespace DungeonProgMaster
                     }
                 }
             }
+            gamePlace.Invalidate();
         }
 
         /// <summary>
@@ -84,39 +89,39 @@ namespace DungeonProgMaster
         /// </summary>
         /// <param name="obj"></param>
         /// <param name="args"></param>
-        private void PlayerMovement()
+        private void PlayerMovement(ref bool isStopped)
         {
+            CheckOnStopped(ref isStopped);
+            if (isStopped) return;
             PlayerMove();
 
             SetPlayerWorldPositionAndSize(sizer);
             var player = level.player;
-            player.UpdatePlayerFrame();
+            playerAnimator.UpdatePlayerFrame(player.Movement);
 
             if (player.Position != player.TargetPosition)
             {
-                System.Threading.Thread.Sleep((int)(100 * frameTimeSpeed));
-                PlayerMovement();
+                Thread.Sleep((int)(100 * frameTimeSpeed));
+                PlayerMovement(ref isStopped);
             }
             if (player.NextMovement != player.Movement)
             {
-                System.Threading.Thread.Sleep((int)(150 * frameTimeSpeed));
+                Thread.Sleep((int)(150 * frameTimeSpeed));
                 player.Rotate();
             }
-
-            gamePlace.Invalidate();
         }
 
-        private bool WatсhWallAndBlank()
+        private bool CheckWallAndBlank()
         {
             var target = level.WatchOnTarget();
-            if (target == MapData.Tales.Wall)
+            if (target == Tales.Wall)
             {
                 MessageBox.Show("Похоже вы пытались выйти за пределы карты, чего делать нельзя. Будьте осторожней.", "Ой",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
                 LevelReset();
                 return false;
             }
-            else if (target == MapData.Tales.Blank)
+            else if (target == Tales.Blank)
             {
                 MessageBox.Show("Вы чуть не упали в дыру в полу. Будьте осторожней!", "Ой",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -156,37 +161,63 @@ namespace DungeonProgMaster
 
         private void PlayButtonClick(object sender, EventArgs args)
         {
-            if (level.player.IsAnimated) return;
-
+            if (playerAnimator.IsAnimated) return;
+            stopTask = new CancellationTokenSource();
             var task = Task.Run(() =>
             {
-                level.player.IsAnimated = true;
+                var isStoped = false;
+                playerAnimator.IsAnimated = true;
                 SetEnabledControls(false, menu.Controls);
+                stopButton.BeginInvoke(new Action(() => stopButton.Enabled = true));
                 var scripts = level.GetScripts();
                 for (var i = 0; i < scripts.Count; i++)
                 {
+                    if (isStoped)
+                    {
+                        SetEnabledControls(true, menu.Controls);
+                        LevelReset();
+                        return;
+                    }
                     scripts[i].Play(level.player);
-                    if (!WatсhWallAndBlank())
+                    if (!CheckWallAndBlank())
                     {
                         SetEnabledControls(true, menu.Controls);
                         return;
                     }
-                    PlayerMovement();
+                    PlayerMovement(ref isStoped);
                 }
-                level.player.IsAnimated = false;
+                playerAnimator.IsAnimated = false;
                 Finished();
 
                 SetEnabledControls(true, menu.Controls);
-                notepad.BeginInvoke(new Action(() => notepad.Enabled = true));
-            });
+                
+            }, stopTask.Token);
+        }
+
+        private void CheckOnStopped(ref bool isStoped)
+        {
+            try
+            {
+                if (stopTask.IsCancellationRequested)
+                    stopTask.Token.ThrowIfCancellationRequested();
+            }
+            catch
+            {
+                isStoped = true;
+            }
+        }
+
+        private void StopButtonClick(object sender, EventArgs args)
+        {
+            stopTask.Cancel();
         }
 
         #region Actions with Scripts
 
         private void AddButtonMenu_ItemClick(object sender, ToolStripItemClickedEventArgs args)
         {
-            var start = notepad.SelectionStart - 1;
-            var end = start + notepad.SelectionLength;
+            var start = notepad.SelectionStart;
+            var end = start == start + notepad.SelectionLength ? start : start + notepad.SelectionLength - 1;
             FindSelectedScripts(start, end, out int startS, out int endS);
 
             var command = level.openedScripts[contextMenu.Items.IndexOf(args.ClickedItem)].Move;
@@ -197,10 +228,10 @@ namespace DungeonProgMaster
             else
             {
                 level.ScriptsRemove(startS, endS - startS);
-                level.ScriptsInsert(startS - (endS - startS), new Script(command));
+                level.ScriptsInsert(startS - (endS - startS) - 1, new Script(command));
             }
             notepad.Text = ScriptsWrite();
-            notepad.Select(end + notepad.Lines[endS].Length, 0);
+            notepad.SelectionStart = end + notepad.Lines[startS].Length + 1;
         }
 
         private void NotepadResetClick(object sender, EventArgs args)
@@ -212,7 +243,7 @@ namespace DungeonProgMaster
         private void NotepadRemoveItem()
         {
             var start = notepad.SelectionStart;
-            var end = start + notepad.SelectionLength - 1;
+            var end = start == start + notepad.SelectionLength ? start : start + notepad.SelectionLength - 1;
 
             FindSelectedScripts(start, end, out int startS, out int endS);
 
@@ -226,14 +257,14 @@ namespace DungeonProgMaster
             var sum = 0;
             startS = -1;
             endS = -1;
-            
             var str = notepad.Lines;
             for (var i = 0; i < str.Length; i++)
             {
-                if (i != 0) sum += 2;//2 = '\n'.Length
-                if (startS == -1 && sum + str[i].Length >= start) startS = i;
-                if (startS != -1 && sum + str[i].Length >= end) endS = i;
+                if (i > 0) sum++;
                 sum += str[i].Length;
+                if (startS == -1 && sum >= start) startS = i;
+                if (startS != -1 && sum >= end) endS = i;
+                
                 if (endS != -1) break;
             }
         }

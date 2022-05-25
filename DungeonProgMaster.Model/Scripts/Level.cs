@@ -18,11 +18,11 @@ namespace DungeonProgMaster.Model
 
         public Level(int id, int[,] map, Player player, Point[] pieces, Command[] openedCommands)
         {
-            CheckLevelOnCorrect(map, player, pieces);
+            CheckLevelOnCorrect(map, pieces);
 
             this.map = map;
 
-            if (!InMap(player.TargetPosition) || map[player.TargetPosition.Y, player.TargetPosition.X] != (int)MapData.Tales.Ground)
+            if (!InMap(player.TargetPosition) || map[player.TargetPosition.Y, player.TargetPosition.X] != (int)Tales.Ground)
                 throw new Exception($"Уровень с ID:{id}. Игрок не на земле!");
 
             this.id = id;
@@ -51,31 +51,35 @@ namespace DungeonProgMaster.Model
             }
         }
 
-        private static void CheckLevelOnCorrect(int[,] map, Player player, Point[] pieces)
+        private static void CheckLevelOnCorrect(int[,] map, Point[] pieces)
         {
             if (map.GetLength(0) != map.GetLength(1)) throw new Exception("Карта должна быть квадратной!");
             bool containsFinish = false;
             foreach (var i in map)
-                if ((int)MapData.Tales.Finish == i) { containsFinish = true; break; }
+                if ((int)Tales.Finish == i) { containsFinish = true; break; }
             if (!containsFinish) throw new Exception("Не существует выхода с уровня!");
             
             foreach (var i in pieces)
                 if (i.X < 0 || i.Y < 0 || i.X >= map.GetLength(0) || i.Y >= map.GetLength(1))
                     throw new Exception($"Монета с координатами {i} находится за пределами карты!");
         }
-
+       
         public void Reset()
         {
             player = new Player(Point.Ceiling(reservePlayer.Position), reservePlayer.Movement, player);
             pickedPieces.Clear();
         }
 
-        public void ScriptsClear() => scripts.Clear();
-
-        public void ScriptAdd(Script str)
+        public void TakePeace()
         {
-            scripts.AddLast(str);
+            if (player.Position != player.TargetPosition) throw new Exception("Ошибка расположения игрока");
+            if (pickedPieces.Contains(player.TargetPosition) || !pieces.Contains(player.TargetPosition)) throw new Exception("Монета уже подобрана, либо её нет на этом месте");
+            pickedPieces.Add(player.TargetPosition);
         }
+
+        #region Action with Scripts
+
+        public void ScriptsClear() => scripts.Clear();
 
         public void ScriptsRemove(int startS, int count)
         {
@@ -162,6 +166,29 @@ namespace DungeonProgMaster.Model
             }
         }
 
+        #endregion
+
+        #region Check
+
+        public Tales WatchOnTarget()
+        {
+            var pos = player.TargetPosition;
+            if (!InMap(pos))
+            {
+                return Tales.Wall;
+            }
+            else if (map[pos.Y, pos.X] == (int)Tales.Blank)
+            {
+                return Tales.Blank;
+            }
+            else return Tales.Ground;
+        }
+
+        public bool InMap(Point pos)
+        {
+            return !(pos.X < 0 || pos.Y < 0 || pos.X >= map.GetLength(0) || pos.Y >= map.GetLength(1));
+        }
+
         public bool ItIsPiece()
         {
             if (player.Position != player.TargetPosition) return false;
@@ -181,33 +208,18 @@ namespace DungeonProgMaster.Model
 
         public bool IsFinished()
         {
-            return map[(int)player.Position.Y, (int)player.Position.X] == (int)MapData.Tales.Finish;
+            return map[(int)player.Position.Y, (int)player.Position.X] == (int)Tales.Finish;
         }
 
-        public void TakePeace()
-        {
-            if (player.Position != player.TargetPosition) throw new Exception("Ошибка расположения игрока");
-            if (pickedPieces.Contains(player.TargetPosition) || !pieces.Contains(player.TargetPosition)) throw new Exception("Монета уже подобрана, либо её нет на этом месте");
-            pickedPieces.Add(player.TargetPosition);
-        }
+        #endregion
+    }
 
-        public bool InMap(Point pos)
-        {
-            return !(pos.X < 0 || pos.Y < 0 || pos.X >= map.GetLength(0) || pos.Y >= map.GetLength(1));
-        }
-        public MapData.Tales WatchOnTarget()
-        {
-            var pos = player.TargetPosition;
-            if (!InMap(pos))
-            {
-                return MapData.Tales.Wall;
-            }
-            else if (map[pos.Y, pos.X] == (int)MapData.Tales.Blank)
-            {
-                return MapData.Tales.Blank;
-            }
-            else return MapData.Tales.Ground;
-        }
+    public enum Tales
+    {
+        Blank = 0,
+        Ground = 1,
+        Finish = 2,
+        Wall = 4,
     }
 
     //шаблон
