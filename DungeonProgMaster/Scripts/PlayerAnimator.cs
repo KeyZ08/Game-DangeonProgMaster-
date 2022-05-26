@@ -40,6 +40,11 @@ namespace DungeonProgMaster
             Anim = anim;
         }
 
+        public void UpdateMovement(PlayerMoveAnim movement)
+        {
+            Anim = PlayerMoveAnimations(movement);
+        }
+
         public void Reset(PlayerMoveAnim movement)
         {
             Anim = PlayerMoveAnimations(movement);

@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DungeonProgMaster", "Dungeo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DungeonProgMaster.Model", "..\DungeonProgMaster.Model\DungeonProgMaster.Model.csproj", "{9201B805-ADB1-43F5-B422-77FFF83E9E81}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DungeonProgMaster.Model.Tests", "..\DungeonProgMaster.Model.Tests\DungeonProgMaster.Model.Tests.csproj", "{2C24D820-FE59-42F6-8425-3E19A71AFA24}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DungeonProgMaster.Model.Tests", "..\DungeonProgMaster.Model.Tests\DungeonProgMaster.Model.Tests.csproj", "{2C24D820-FE59-42F6-8425-3E19A71AFA24}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

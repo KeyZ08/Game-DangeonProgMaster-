@@ -22,7 +22,7 @@ namespace DungeonProgMaster
 
         public DungeonProgMaster()
         {
-            level = Levels.GetLevel(3);
+            level = Levels.GetLevel(0);
             playerAnimator = new PlayerAnimator(level.player.Movement);
             InitializeComponent();
             InitializeDesign();
@@ -108,6 +108,7 @@ namespace DungeonProgMaster
             {
                 Thread.Sleep((int)(150 * frameTimeSpeed));
                 player.Rotate();
+                playerAnimator.UpdateMovement(player.Movement);
             }
         }
 
@@ -117,14 +118,16 @@ namespace DungeonProgMaster
             if (target == Tales.Wall)
             {
                 MessageBox.Show("Похоже вы пытались выйти за пределы карты, чего делать нельзя. Будьте осторожней.", "Ой",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBoxButtons.OK, MessageBoxIcon.Error, 
+                    MessageBoxDefaultButton.Button1, MessageBoxOptions.ServiceNotification);
                 LevelReset();
                 return false;
             }
             else if (target == Tales.Blank)
             {
                 MessageBox.Show("Вы чуть не упали в дыру в полу. Будьте осторожней!", "Ой",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBoxButtons.OK, MessageBoxIcon.Error, 
+                    MessageBoxDefaultButton.Button1, MessageBoxOptions.ServiceNotification);
                 LevelReset();
                 return false;
             }
@@ -136,13 +139,15 @@ namespace DungeonProgMaster
             if(!level.AllPiecesAssembled())
             {
                 MessageBox.Show("Для перехода на следующий уровень нужно собрать все монеты!", "",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBoxButtons.OK, MessageBoxIcon.Error, 
+                    MessageBoxDefaultButton.Button1, MessageBoxOptions.ServiceNotification);
                 LevelReset();
             }
             else if (level.IsFinished())
             {
                 var message = MessageBox.Show("Уровень пройден! Перейти на следующий уровень? ", "Ура!",
-                    MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Information, 
+                    MessageBoxDefaultButton.Button1, MessageBoxOptions.ServiceNotification);
                 if (message == DialogResult.Yes)
                 {
                     level = Levels.GetLevel(level.id + 1);
@@ -154,7 +159,8 @@ namespace DungeonProgMaster
             else
             {
                 MessageBox.Show("Похоже вы не дошли до финиша, попробуйте ещё раз!", "Опля",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBoxButtons.OK, MessageBoxIcon.Error, 
+                    MessageBoxDefaultButton.Button1, MessageBoxOptions.ServiceNotification);
                 LevelReset();
             }
         }
