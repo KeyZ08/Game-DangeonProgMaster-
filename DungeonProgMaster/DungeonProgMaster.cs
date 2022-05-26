@@ -109,6 +109,7 @@ namespace DungeonProgMaster
                 Thread.Sleep((int)(150 * frameTimeSpeed));
                 player.Rotate();
                 playerAnimator.UpdateMovement(player.Movement);
+                gamePlace.Invalidate();
             }
         }
 
