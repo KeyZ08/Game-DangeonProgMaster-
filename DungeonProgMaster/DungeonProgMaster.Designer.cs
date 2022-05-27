@@ -64,6 +64,7 @@ namespace DungeonProgMaster
             this.SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
             this.Name = "DungeonProgMaster";
             this.Text = "DungeonProgMaster";
+            this.Icon = new Icon(Application.StartupPath + @"..\..\..\Resources\icon.ico");
             this.ResumeLayout(false);
         }
 
