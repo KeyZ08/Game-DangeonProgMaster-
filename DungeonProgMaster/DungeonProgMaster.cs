@@ -22,8 +22,8 @@ namespace DungeonProgMaster
 
         public DungeonProgMaster()
         {
-            level = Levels.GetLevel(0);
-            playerAnimator = new PlayerAnimator(level.player.Movement);
+            level = Levels.GetLevel(4);
+            playerAnimator = new PlayerAnimator(level.Player.Movement);
             InitializeComponent();
             InitializeDesign();
 
@@ -31,6 +31,10 @@ namespace DungeonProgMaster
             pieceAnimator = new Timers.Timer(100);
             pieceAnimator.Elapsed += PieceUpdateFrame;
             pieceAnimator.Start();
+
+            MessageBox.Show("Пожалуйста, прочитайте Инструкцию, если вы впервые заходите в эту игру.", "Важно!",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information,
+                    MessageBoxDefaultButton.Button1, MessageBoxOptions.ServiceNotification);
         }
 
         /// <summary>
@@ -40,7 +44,7 @@ namespace DungeonProgMaster
         {
             level.Reset();
             WindowResize();
-            playerAnimator.Reset(level.player.Movement);
+            playerAnimator.Reset(level.Player.Movement);
             
             gamePlace.Invalidate();
         }
@@ -56,7 +60,7 @@ namespace DungeonProgMaster
 
         public void PlayerMove()
         {
-            var player = level.player;
+            var player = level.Player;
             if (player.Position == player.TargetPosition)
                 return;
 
@@ -96,7 +100,7 @@ namespace DungeonProgMaster
             PlayerMove();
 
             SetPlayerWorldPositionAndSize(sizer);
-            var player = level.player;
+            var player = level.Player;
             
             gamePlace.Invalidate();
             if (player.Position != player.TargetPosition)
@@ -113,59 +117,6 @@ namespace DungeonProgMaster
             }
         }
 
-        private bool CheckWallAndBlank()
-        {
-            var target = level.WatchOnTarget();
-            if (target == Tales.Wall)
-            {
-                MessageBox.Show("Похоже вы пытались выйти за пределы карты, чего делать нельзя. Будьте осторожней.", "Ой",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error, 
-                    MessageBoxDefaultButton.Button1, MessageBoxOptions.ServiceNotification);
-                LevelReset();
-                return false;
-            }
-            else if (target == Tales.Blank)
-            {
-                MessageBox.Show("Вы чуть не упали в дыру в полу. Будьте осторожней!", "Ой",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error, 
-                    MessageBoxDefaultButton.Button1, MessageBoxOptions.ServiceNotification);
-                LevelReset();
-                return false;
-            }
-            return true;
-        }
-
-        private void Finished()
-        {
-            if(!level.AllPiecesAssembled())
-            {
-                MessageBox.Show("Для перехода на следующий уровень нужно собрать все монеты!", "",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error, 
-                    MessageBoxDefaultButton.Button1, MessageBoxOptions.ServiceNotification);
-                LevelReset();
-            }
-            else if (level.IsFinished())
-            {
-                var message = MessageBox.Show("Уровень пройден! Перейти на следующий уровень? ", "Ура!",
-                    MessageBoxButtons.YesNo, MessageBoxIcon.Information, 
-                    MessageBoxDefaultButton.Button1, MessageBoxOptions.ServiceNotification);
-                if (message == DialogResult.Yes)
-                {
-                    level = Levels.GetLevel(level.id + 1);
-                    LevelReset();
-                    notepad.BeginInvoke(new Action(() => notepad.ResetText()));
-                }
-                else LevelReset();
-            }
-            else
-            {
-                MessageBox.Show("Похоже вы не дошли до финиша, попробуйте ещё раз!", "Опля",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error, 
-                    MessageBoxDefaultButton.Button1, MessageBoxOptions.ServiceNotification);
-                LevelReset();
-            }
-        }
-
         private void PlayButtonClick(object sender, EventArgs args)
         {
             if (playerAnimator.IsAnimated) return;
@@ -177,6 +128,14 @@ namespace DungeonProgMaster
                 SetEnabledControls(false, menu.Controls);
                 stopButton.BeginInvoke(new Action(() => stopButton.Enabled = true));
                 var scripts = level.GetScripts();
+                if(level.scripts.Count > level.MaxScriptCount)
+                {
+                    ExceedingNumberScripts();
+                    SetEnabledControls(true, menu.Controls);
+                    stopButton.BeginInvoke(new Action(() => stopButton.Enabled = false));
+                    LevelReset();
+                    return;
+                }
                 for (var i = 0; i < scripts.Count; i++)
                 {
                     if (isStoped)
@@ -187,7 +146,7 @@ namespace DungeonProgMaster
                         return;
                     }
 
-                    scripts[i].Play(level.player);
+                    scripts[i].Play(level.Player);
                     if (!CheckWallAndBlank())
                     {
                         SetEnabledControls(true, menu.Controls);
@@ -223,6 +182,81 @@ namespace DungeonProgMaster
             stopTask.Cancel();
         }
 
+        #region Messages
+
+        private bool CheckWallAndBlank()
+        {
+            var target = level.WatchOnTarget();
+            if (target == Tales.Wall)
+            {
+                MessageBox.Show("Похоже вы пытались выйти за пределы карты, чего делать нельзя. Будьте осторожней.", "Ой",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error,
+                    MessageBoxDefaultButton.Button1, MessageBoxOptions.ServiceNotification);
+                LevelReset();
+                return false;
+            }
+            else if (target == Tales.Blank)
+            {
+                MessageBox.Show("Вы чуть не упали в дыру в полу. Будьте осторожней!", "Ой",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error,
+                    MessageBoxDefaultButton.Button1, MessageBoxOptions.ServiceNotification);
+                LevelReset();
+                return false;
+            }
+            return true;
+        }
+
+        private void ExceedingNumberScripts()
+        {
+            MessageBox.Show($"Данный уровень можно пройти за {level.MaxScriptCount} строк кода. Попробуйте ещё раз!", "Ой",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error,
+                    MessageBoxDefaultButton.Button1, MessageBoxOptions.ServiceNotification);
+        }
+
+        private void Finished()
+        {
+            if (!level.AllPiecesAssembled())
+            {
+                MessageBox.Show("Для перехода на следующий уровень нужно собрать все монеты!", "",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error,
+                    MessageBoxDefaultButton.Button1, MessageBoxOptions.ServiceNotification);
+                LevelReset();
+            }
+            else if (level.IsFinished())
+            {
+                var message = MessageBox.Show("Уровень пройден! Перейти на следующий уровень? ", "Ура!",
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Information,
+                    MessageBoxDefaultButton.Button1, MessageBoxOptions.ServiceNotification);
+                if (message == DialogResult.Yes)
+                {
+                    try
+                    {
+                        level = Levels.GetLevel(level.id + 1);
+                    }
+                    catch
+                    {
+                        MessageBox.Show("Благодарю за прохождение демо версии игры. " +
+                            "Здесь много чего ещё можно улучшить и добавить," +
+                            " но главная идея и механика созданы и функционируют.", "Спасибо за игру!",
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Information,
+                    MessageBoxDefaultButton.Button1, MessageBoxOptions.ServiceNotification);
+                    }
+                    LevelReset();
+                    notepad.BeginInvoke(new Action(() => notepad.ResetText()));
+                }
+                else LevelReset();
+            }
+            else
+            {
+                MessageBox.Show("Похоже вы не дошли до финиша, попробуйте ещё раз!", "Опля",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error,
+                    MessageBoxDefaultButton.Button1, MessageBoxOptions.ServiceNotification);
+                LevelReset();
+            }
+        }
+
+        #endregion
+
         #region Actions with Scripts
 
         private void AddButtonMenu_ItemClick(object sender, ToolStripItemClickedEventArgs args)
@@ -239,7 +273,7 @@ namespace DungeonProgMaster
             else
             {
                 level.ScriptsRemove(startS, endS - startS);
-                level.ScriptsInsert(startS - (endS - startS) - 1, new Script(command));
+                level.ScriptsInsert(startS - 1 < 0 ? 0 : startS - 1, new Script(command));
             }
             notepad.Text = ScriptsWrite();
             notepad.SelectionStart = end + notepad.Lines[startS].Length + 1;

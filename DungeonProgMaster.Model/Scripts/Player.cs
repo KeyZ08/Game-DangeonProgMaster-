@@ -21,14 +21,6 @@ namespace DungeonProgMaster.Model
             NextMovement = Movement;
         }
 
-        public Player(Point position, PlayerMoveAnim defaultAnim, Player p)
-        {
-            _position = position;
-            Movement = defaultAnim;
-            _target = position;
-            NextMovement = Movement;
-        }
-
         public void GetNextMovement()
         {
             if (Movement == PlayerMoveAnim.Right)
@@ -43,6 +35,7 @@ namespace DungeonProgMaster.Model
 
         public void GetNextTargetPosition()
         {
+            if (!Position.Equals(TargetPosition)) return;
             if (Movement == PlayerMoveAnim.Right)
                 _target.X += 1;
             else if (Movement == PlayerMoveAnim.Left)
@@ -55,6 +48,7 @@ namespace DungeonProgMaster.Model
 
         public void Move(float distance)
         {
+            if (Position.Equals(TargetPosition)) return;
             var pos = Position;
             if (Movement == PlayerMoveAnim.Right) pos.X += distance;
             else if (Movement == PlayerMoveAnim.Left) pos.X -= distance;

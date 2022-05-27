@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace DungeonProgMaster.Model
 {
-    public class Commands
+    public static class Commands
     {
         public static void ForwardMove(Player player)
         {

@@ -118,7 +118,7 @@ namespace DungeonProgMaster
             }
 
             //игрок
-            var player = level.player;
+            var player = level.Player;
             gr.DrawImage(playerAnimator.Anim[playerAnimator.CurrentFrame], new RectangleF(WorldPlayerPosition, WorldPlayerSize),
                  new RectangleF(PointF.Empty, playerAnimator.Anim[playerAnimator.CurrentFrame].Size), GraphicsUnit.Pixel);
             
@@ -298,7 +298,7 @@ namespace DungeonProgMaster
         private void SetPlayerWorldPositionAndSize(Sizer sizer)
         {
             WorldPlayerSize = sizer.GetWorldSize(new Size(64, 64));
-            WorldPlayerPosition = sizer.GetWorldPosition(level.player.Position, WorldPlayerSize);
+            WorldPlayerPosition = sizer.GetWorldPosition(level.Player.Position, WorldPlayerSize);
         }
 
         private void PieceUpdateFrame(object sender, EventArgs args)

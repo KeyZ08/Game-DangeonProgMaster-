@@ -10,27 +10,24 @@ namespace DungeonProgMaster.Model
         public readonly int id;
         public readonly int[,] map;
         readonly Player reservePlayer;
-        public Player player;
+        public Player Player { get; private set; }
         public readonly List<Point> pieces;
         public LinkedList<Script> scripts;
+        public int MaxScriptCount { get; private set; }
         public HashSet<Point> pickedPieces;
         public readonly Script[] openedScripts;
 
-        public Level(int id, int[,] map, Player player, Point[] pieces, Command[] openedCommands)
+        public Level(int id, int[,] map, Player player, Point[] pieces, Command[] openedCommands, int maxScriptCount = 99)
         {
-            CheckLevelOnCorrect(map, pieces);
-
             this.map = map;
-
-            if (!InMap(player.TargetPosition) || map[player.TargetPosition.Y, player.TargetPosition.X] != (int)Tales.Ground)
-                throw new Exception($"Уровень с ID:{id}. Игрок не на земле!");
+            CheckLevelOnCorrect(id, player, map, pieces);
 
             this.id = id;
-            this.player = player;
+            Player = player;
             reservePlayer = new Player(player.TargetPosition, player.Movement);
             pickedPieces = new HashSet<Point>();
             scripts = new LinkedList<Script>();
-
+            MaxScriptCount = maxScriptCount;
             this.pieces = new List<Point>(pieces);
 
             if (openedCommands.Length == 0)
@@ -51,12 +48,17 @@ namespace DungeonProgMaster.Model
             }
         }
 
-        private static void CheckLevelOnCorrect(int[,] map, Point[] pieces)
+        private void CheckLevelOnCorrect(int id, Player player, int[,] map, Point[] pieces)
         {
+            if (id < 0) throw new ArgumentException();
+            if (player == null) throw new ArgumentNullException();
             if (map.GetLength(0) != map.GetLength(1)) throw new Exception("Карта должна быть квадратной!");
+            if (!InMap(player.TargetPosition) || map[player.TargetPosition.Y, player.TargetPosition.X] != (int)Tales.Ground)
+                throw new Exception($"Уровень с ID:{id}. Игрок не на земле!");
             bool containsFinish = false;
             foreach (var i in map)
-                if ((int)Tales.Finish == i) { containsFinish = true; break; }
+                if ((int)Tales.Finish == i) 
+                { containsFinish = true; break; }
             if (!containsFinish) throw new Exception("Не существует выхода с уровня!");
             
             foreach (var i in pieces)
@@ -66,15 +68,15 @@ namespace DungeonProgMaster.Model
        
         public void Reset()
         {
-            player = new Player(Point.Ceiling(reservePlayer.Position), reservePlayer.Movement, player);
+            Player = new Player(Point.Ceiling(reservePlayer.Position), reservePlayer.Movement);
             pickedPieces.Clear();
         }
 
         public void TakePeace()
         {
-            if (player.Position != player.TargetPosition) throw new Exception("Ошибка расположения игрока");
-            if (pickedPieces.Contains(player.TargetPosition) || !pieces.Contains(player.TargetPosition)) throw new Exception("Монета уже подобрана, либо её нет на этом месте");
-            pickedPieces.Add(player.TargetPosition);
+            if (Player.Position != Player.TargetPosition) throw new Exception("Ошибка расположения игрока");
+            if (pickedPieces.Contains(Player.TargetPosition) || !pieces.Contains(Player.TargetPosition)) throw new Exception("Монета уже подобрана, либо её нет на этом месте");
+            pickedPieces.Add(Player.TargetPosition);
         }
 
         #region Action with Scripts
@@ -172,7 +174,7 @@ namespace DungeonProgMaster.Model
 
         public Tales WatchOnTarget()
         {
-            var pos = player.TargetPosition;
+            var pos = Player.TargetPosition;
             if (!InMap(pos))
             {
                 return Tales.Wall;
@@ -191,14 +193,14 @@ namespace DungeonProgMaster.Model
 
         public bool ItIsPiece()
         {
-            if (player.Position != player.TargetPosition) return false;
-            return pieces.Contains(player.TargetPosition);
+            if (Player.Position != Player.TargetPosition) return false;
+            return pieces.Contains(Player.TargetPosition);
         }
 
         public bool ItIsPickedPiece()
         {
-            if (player.Position != player.TargetPosition) return false;
-            return pickedPieces.Contains(player.TargetPosition);
+            if (Player.Position != Player.TargetPosition) return false;
+            return pickedPieces.Contains(Player.TargetPosition);
         }
 
         public bool AllPiecesAssembled()
@@ -208,7 +210,7 @@ namespace DungeonProgMaster.Model
 
         public bool IsFinished()
         {
-            return map[(int)player.Position.Y, (int)player.Position.X] == (int)Tales.Finish;
+            return map[(int)Player.Position.Y, (int)Player.Position.X] == (int)Tales.Finish;
         }
 
         #endregion

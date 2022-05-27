@@ -5,19 +5,19 @@ namespace DungeonProgMaster.Model
 {
     public class Script
     {
-        public Command Move { get; private set; }
+        public readonly Command Move;
 
-        public string Sketch { get; private set; }
+        public readonly string Sketch;
 
-        public string Declaration { get; private set; }
+        public readonly string Declaration;
 
         private readonly Action<Player> Doing;
 
         public Script(Command move)
         {
             Move = move;
-            Sketch = Sketches.data[move].sketch;
-            Declaration = Sketches.data[move].declaration;
+            Sketch = data[move].sketch;
+            Declaration = data[move].declaration;
             Doing = Commands.commands[move];
         }
 
@@ -25,11 +25,8 @@ namespace DungeonProgMaster.Model
         {
             Doing.Invoke(player);
         }
-    }
 
-    public static class Sketches
-    {
-        public static Dictionary<Command, (string sketch, string declaration)> data = new()
+        private static readonly Dictionary<Command, (string sketch, string declaration)> data = new()
         {
             { Command.Forward, ("Player.Forward();", "Player.Forward();") },
             { Command.Rotate, ("Player.Rotate();", "Player.Rotate();") },
