@@ -94,6 +94,28 @@ namespace DungeonProgMaster.Model
                     new Player(new Point(7,1), PlayerMoveAnim.Bottom),
                     Array.Empty<Point>(), Array.Empty<Command>(), 6)
             },
+            {
+                new Level(5,
+                    new int[,]
+                {
+                    { 1,1,0,1,1,0,0,1},
+                    { 0,1,1,1,1,1,1,1},
+                    { 1,1,1,1,0,1,0,1},
+                    { 0,1,1,1,1,1,1,1},
+                    { 1,1,1,1,0,1,1,1},
+                    { 1,1,1,1,1,1,1,1},
+                    { 0,0,1,1,1,1,1,0},
+                    { 1,2,1,1,0,1,1,1},
+                }, 
+                    new Player(new Point(7,7), PlayerMoveAnim.Left),
+                    new Point[] { 
+                        new Point(5,6), new Point(5,4), new Point(5,2),
+                        new Point(7,5), new Point(7,3), new Point(7,1),
+                        new Point(3,6), new Point(3,4), new Point(3,2),
+                        new Point(1,5), new Point(1,3), new Point(1,1),
+                    }, 
+                    Array.Empty<Command>(), 13)
+            },
         };
 
         public static Level GetLevel(int id)

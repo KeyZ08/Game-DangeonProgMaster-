@@ -22,7 +22,7 @@ namespace DungeonProgMaster
 
         public DungeonProgMaster()
         {
-            level = Levels.GetLevel(4);
+            level = Levels.GetLevel(0);
             playerAnimator = new PlayerAnimator(level.Player.Movement);
             InitializeComponent();
             InitializeDesign();
